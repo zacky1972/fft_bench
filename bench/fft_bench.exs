@@ -1,5 +1,5 @@
 inputs =
-  [1024]
+  [1024, 4096, 32768]
   |> Enum.map(fn size ->
     {
       "size #{size}: IPS #{div(105_000_000, size) |> Number.Delimit.number_to_delimited()}",
@@ -8,9 +8,12 @@ inputs =
   end)
   |> Map.new()
 
+fft_exla_cpu = EXLA.jit(&Nx.fft/1)
+
 Benchee.run(
   %{
-    "FFT" => fn input -> Nx.fft(input) end
+    "FFT (Nx)" => fn input -> Nx.fft(input) end,
+    "FFT (EXLA CPU)" => fn input -> fft_exla_cpu.(input) end
   },
   inputs: inputs
 )
